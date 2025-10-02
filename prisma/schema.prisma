@@ -15,37 +15,39 @@ datasource db {
 }
 
 model User {
- id String @id @default(uuid())
- email String @unique
- firstName String
- lastName String
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
+  id String @id @default(uuid())
+  email String @unique
+  firstName String
+  lastName String
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
   posts Post[]
- comments Comment[]
+  comments Comment[]
 }
 
 model Post {
- id String @id @default(uuid())
- content String
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
+  id String @id @default(uuid())
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
- author User @relation(fields: [authorId], references: [id])
- authorId String
+  author User @relation(fields: [authorId], references: [id])
+  authorId String
 
- comments Comment[]
+  comments Comment[]
 }
 
 model Comment {
- id String @id @default(uuid())
- content String
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
+  id String @id @default(uuid())
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
- author User @relation(fields: [authorId], references: [id])
- authorId String
+  author User @relation(fields: [authorId], references: [id])
+  authorId String
 
- post Post @relation(fields: [postId], references: [id])
- postId String
+  post Post @relation(fields: [postId], references: [id])
+  postId String
 }
