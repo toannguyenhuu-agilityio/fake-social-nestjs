@@ -52,6 +52,7 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard('jwt-refresh'))
+  @Public()
   @Post('refresh')
   @ApiOperation({ summary: 'User refresh tokens (sets JWT in cookies)' })
   @ApiResponse({

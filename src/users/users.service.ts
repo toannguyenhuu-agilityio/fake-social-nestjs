@@ -1,29 +1,39 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto, UpdateUserDTO } from './dto';
 import { hashPassword } from 'src/shared/utils';
+import { PaginationQueryDto } from 'src/shared/dtos';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findOne(identifier: string) {
-    const isEmail = identifier.includes('@');
-
-    return await this.prisma.user.findUnique({
-      where: isEmail ? { email: identifier } : { id: identifier },
-    });
-  }
-
   async getUserByEmail(email: string) {
-    return await this.findOne(email);
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException('Email still not registered');
+    }
+
+    return existingUser;
   }
 
   async getUserById(id: string) {
-    return await this.findOne(id);
+    return await this.checkUserExists(id);
   }
 
-  async findAll({ page, limit }: { page: number; limit: number }) {
+  async findAll({
+    page,
+    limit,
+    orderBy = 'createdAt',
+    sort = 'desc',
+  }: PaginationQueryDto) {
     const skip = (page - 1) * limit;
 
     const [total, users] = await this.prisma.$transaction([
@@ -31,9 +41,7 @@ export class UsersService {
       this.prisma.user.findMany({
         skip,
         take: limit,
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: { [orderBy]: sort },
         select: {
           id: true,
           email: true,
@@ -82,6 +90,8 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDTO) {
+    await this.checkUserExists(id);
+
     return this.prisma.user.update({
       where: {
         id,
@@ -93,10 +103,20 @@ export class UsersService {
   }
 
   async delete(id: string) {
+    await this.checkUserExists(id);
+
     return this.prisma.user.delete({
       where: {
         id,
       },
     });
+  }
+
+  async checkUserExists(id: string) {
+    const existingUser = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!existingUser) throw new NotFoundException('User not found');
+
+    return existingUser;
   }
 }
