@@ -14,12 +14,14 @@ import {
   ApiInternalServerErrorResponseDecorator,
   ApiUnauthorizedResponseDecorator,
 } from 'src/shared/decorators';
+import { Public } from 'src/shared/decorators/public.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('login')
   @ApiOperation({ summary: 'User login (sets JWT in cookies)' })
   @ApiBody({ type: LoginDto })
@@ -35,7 +37,7 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken } =
       await this.authService.login(loginDto);
-    console.log('accessToken', accessToken);
+
     res.cookie(COOKIE_KEYS.ACCESS, accessToken, {
       httpOnly: COOKIE_HTTP_ONLY,
       secure: COOKIE_SECURE,
@@ -84,6 +86,7 @@ export class AuthController {
     return { message: 'Tokens refreshed' };
   }
 
+  @Public()
   @Post('logout')
   @ApiOperation({ summary: 'User logout (clears JWT cookies)' })
   @ApiResponse({
