@@ -27,8 +27,14 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
 
   // Cookies
-
   app.use(cookieParser());
+
+  // CORS
+  // Enable CORS for Frontend communication
+  app.enableCors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true, // allow sending cookies
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
