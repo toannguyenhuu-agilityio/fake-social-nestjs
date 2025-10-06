@@ -1,1 +1,1 @@
-export * from './api.decorators';
+export * from './api.decorator';

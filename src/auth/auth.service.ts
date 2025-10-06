@@ -31,10 +31,6 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.usersService.getUserByEmail(dto.email);
 
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
     const isPasswordValid = await validatePassword(dto.password, user.password);
 
     if (!isPasswordValid) {
