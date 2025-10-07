@@ -9,12 +9,9 @@ import {
   COOKIE_MAX_AGE,
   COOKIE_SECURE,
 } from 'src/shared/constants/cookies';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  ApiInternalServerErrorResponseDecorator,
-  ApiUnauthorizedResponseDecorator,
-} from 'src/shared/decorators';
+import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/shared/decorators/public.decorator';
+import { ApiLoginDocs, ApiLogoutDocs, ApiRefreshTokenDocs } from './decorators';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -22,15 +19,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
+  @ApiLoginDocs()
   @Post('login')
-  @ApiOperation({ summary: 'User login (sets JWT in cookies)' })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Login successfully, JWT cookies set',
-  })
-  @ApiUnauthorizedResponseDecorator()
-  @ApiInternalServerErrorResponseDecorator()
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -54,19 +44,12 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-refresh'))
   @Public()
   @Post('refresh')
-  @ApiOperation({ summary: 'User refresh tokens (sets JWT in cookies)' })
-  @ApiResponse({
-    status: 200,
-    description: 'Tokens refreshed, JWT cookies set',
-  })
-  @ApiUnauthorizedResponseDecorator()
-  @ApiInternalServerErrorResponseDecorator()
+  @ApiRefreshTokenDocs()
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { userId, email } = req.user as { userId: string; email: string };
-
     const { accessToken, refreshToken } = await this.authService.refreshTokens(
       userId,
       email,
@@ -89,12 +72,7 @@ export class AuthController {
 
   @Public()
   @Post('logout')
-  @ApiOperation({ summary: 'User logout (clears JWT cookies)' })
-  @ApiResponse({
-    status: 200,
-    description: 'Logout successfully, JWT cookies cleared',
-  })
-  @ApiInternalServerErrorResponseDecorator()
+  @ApiLogoutDocs()
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie(COOKIE_KEYS.ACCESS);
     res.clearCookie(COOKIE_KEYS.REFRESH);
