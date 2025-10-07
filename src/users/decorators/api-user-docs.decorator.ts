@@ -76,7 +76,6 @@ export const ApiGetUsersDocs = () => {
       status: 200,
       description: 'List of users successfully retrieved',
       type: [UserEntity],
-      isArray: true,
       example: {
         data: [UserReponseSample],
         meta: {
