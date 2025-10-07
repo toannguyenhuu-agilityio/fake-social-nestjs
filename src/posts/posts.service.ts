@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePostDto, UpdatePostDTO } from './dtos';
 import { PaginationQueryDto } from 'src/shared/dtos';
@@ -16,7 +20,7 @@ export class PostsService {
   }
 
   async findPost(id: string) {
-    return this.prisma.post.findUnique({ where: { id } });
+    return await this.checkPostExists(id);
   }
 
   async findAll({
@@ -52,7 +56,21 @@ export class PostsService {
     };
   }
 
-  async update(id: string, dto: UpdatePostDTO) {
+  async update({
+    id,
+    dto,
+    userId,
+  }: {
+    id: string;
+    dto: UpdatePostDTO;
+    userId: string;
+  }) {
+    const { authorId } = await this.checkPostExists(id);
+
+    // Check the user is the author
+    if (authorId && userId !== authorId)
+      throw new ForbiddenException('You are not allowed to update this post');
+
     return this.prisma.post.update({
       where: {
         id,
@@ -63,11 +81,25 @@ export class PostsService {
     });
   }
 
-  async delete(id: string) {
+  async delete(id: string, userId: string) {
+    const { authorId } = await this.checkPostExists(id);
+
+    // Check the user is the author
+    if (authorId && userId !== authorId)
+      throw new ForbiddenException('You are not allowed to delete this post');
+
     return this.prisma.post.delete({
       where: {
         id,
       },
     });
+  }
+
+  async checkPostExists(id: string) {
+    const existingPost = await this.prisma.post.findUnique({ where: { id } });
+
+    if (!existingPost) throw new NotFoundException('Post not found');
+
+    return existingPost;
   }
 }

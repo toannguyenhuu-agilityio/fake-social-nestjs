@@ -7,14 +7,19 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { UserEntity } from '../dto/user.entity';
-import { ApiInternalServerErrorResponseDecorator } from 'src/shared/decorators';
-import { CreateUserDto, UpdateUserDTO } from '../dto';
+import {
+  ApiBadRequestResponseDecorator,
+  ApiInternalServerErrorResponseDecorator,
+} from 'src/shared/decorators';
+import { CreateUserDto, UpdateUserDto } from '../dto';
 
 const UserReponseSample = {
   id: 'c4b9f5c1-29b1-4db8-9a13-8e3e5d725c92',
   email: 'toan.nguyenhuu@asnet.com.vn',
   firstName: 'Toan',
   lastName: 'Nguyen',
+  createdAt: '2025-10-06T00:00:00.000Z',
+  updatedAt: '2025-10-06T00:00:00.000Z',
 };
 
 export const ApiGetUserDocs = () => {
@@ -96,11 +101,6 @@ export const ApiGetUsersDocs = () => {
 export const ApiCreateUserDocs = () => {
   return applyDecorators(
     ApiOperation({ summary: 'Create a new user' }),
-    ApiParam({
-      name: 'id',
-      type: String,
-      description: 'User ID (UUID format)',
-    }),
     ApiBody({ type: CreateUserDto }),
     ApiResponse({
       status: 201,
@@ -108,10 +108,7 @@ export const ApiCreateUserDocs = () => {
       description: 'User successfully created',
       example: UserReponseSample,
     }),
-    ApiResponse({
-      status: 400,
-      description: 'Bad request',
-    }),
+    ApiBadRequestResponseDecorator(),
     ApiResponse({ status: 409, description: 'User already exists' }),
     ApiInternalServerErrorResponseDecorator(),
   );
@@ -126,7 +123,7 @@ export const ApiUpdateUserDocs = () => {
       description: 'User ID (UUID format)',
     }),
     ApiBody({
-      type: UpdateUserDTO,
+      type: UpdateUserDto,
       examples: {
         validExample: {
           summary: 'A valid update request',
@@ -153,10 +150,7 @@ export const ApiUpdateUserDocs = () => {
       description: 'User successfully updated',
       example: UserReponseSample,
     }),
-    ApiResponse({
-      status: 400,
-      description: 'Bad request',
-    }),
+    ApiBadRequestResponseDecorator(),
     ApiResponse({ status: 404, description: 'User not found' }),
     ApiInternalServerErrorResponseDecorator(),
   );
