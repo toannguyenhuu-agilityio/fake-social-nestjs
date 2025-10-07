@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto, UpdateUserDTO } from './dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { hashPassword } from 'src/shared/utils';
 import { PaginationQueryDto } from 'src/shared/dtos';
 
@@ -89,7 +89,7 @@ export class UsersService {
     });
   }
 
-  async update(id: string, dto: UpdateUserDTO) {
+  async update(id: string, dto: UpdateUserDto) {
     await this.checkUserExists(id);
 
     return this.prisma.user.update({

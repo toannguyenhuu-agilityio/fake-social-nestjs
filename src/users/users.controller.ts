@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDTO } from './dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { UserEntity } from './dto/user.entity';
 import { ApiTags } from '@nestjs/swagger';
@@ -58,7 +58,7 @@ export class UsersController {
   @Patch(':id')
   async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() dto: UpdateUserDTO,
+    @Body() dto: UpdateUserDto,
   ) {
     return this.usersService.update(id, dto);
   }
