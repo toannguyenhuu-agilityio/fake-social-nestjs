@@ -1,25 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreatePostDto {
   @ApiProperty({ example: 'My first post', description: 'Title of the post' })
   @IsNotEmpty()
-  @IsNotEmpty()
+  @IsString()
   title: string;
 
   @ApiProperty({
     example: 'This is my first post',
     description: 'Content of the post',
+    required: true,
   })
-  @IsNotEmpty()
+  @IsString()
   @IsNotEmpty()
   content: string;
 
   @ApiProperty({
-    example: 'toan.nguyenhuu@asnet.com.vn',
-    description: 'Uniqe email of the user',
+    example: 'b5d7f64a-2e0a-4d69-ae19-7e3e911ce8f2',
+    description: 'The ID of the user (author) who wrote the post',
   })
-  @IsNotEmpty()
+  @IsUUID()
   @IsNotEmpty()
   authorId: string;
 }
