@@ -42,9 +42,8 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard('jwt-refresh'))
-  @Public()
-  @Post('refresh')
   @ApiRefreshTokenDocs()
+  @Post('refresh')
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,

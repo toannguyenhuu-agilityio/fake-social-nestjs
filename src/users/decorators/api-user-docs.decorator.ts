@@ -87,8 +87,6 @@ export const ApiGetUsersDocs = () => {
           currentPage: 1,
           totalPages: 1,
           totalItems: 1,
-          limit: 10,
-          offset: 0,
           nextPage: null,
           previousPage: null,
         },

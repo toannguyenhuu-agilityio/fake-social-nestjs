@@ -19,6 +19,7 @@ export const ApiLoginDocs = () => {
       description: 'Login successfully, JWT cookies set',
     }),
     ApiBadRequestResponseDecorator('Invalid email or password'),
+    ApiInternalServerErrorResponseDecorator(),
   );
 };
 

@@ -13,12 +13,22 @@ import {
   ApiUnauthorizedResponseDecorator,
 } from 'src/shared/decorators';
 import { CommentEntity } from 'src/comments/dtos';
+import { CreatePostDto, UpdatePostDTO } from '../dtos';
 
 const PostReponseSample = {
   id: 'c4b9f5c1-29b1-4db8-9a13-8e3e5d725c92',
   title: 'Post 1',
   content: 'Content of post 1',
   authorId: 'c4b9f5c1-29b1-4db8-9a13-8e3e5d725c92',
+  createdAt: '2025-10-07T00:00:00.000Z',
+  updatedAt: '2025-10-07T00:00:00.000Z',
+};
+
+const CommentReponseSample = {
+  id: 'c4b9f5c1-29b1-4db8-9a13-8e3e5d725c92',
+  content: 'Comment content',
+  authorId: 'c4b9f5c1-29b1-4db8-9a13-8e3e5d725c92',
+  postId: 'c4b9f5c1-29b1-4db8-9a13-8e3e5d725c92',
   createdAt: '2025-10-07T00:00:00.000Z',
   updatedAt: '2025-10-07T00:00:00.000Z',
 };
@@ -49,7 +59,7 @@ export const ApiGetPostDocs = () => {
 
 export const ApiGetPostsDocs = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Get all posts' }),
+    ApiOperation({ summary: 'Get all posts (paginated)' }),
     ApiQuery({
       name: 'page',
       required: false,
@@ -86,8 +96,6 @@ export const ApiGetPostsDocs = () => {
           currentPage: 1,
           totalPages: 1,
           totalItems: 1,
-          limit: 10,
-          offset: 0,
           nextPage: null,
           previousPage: null,
         },
@@ -100,7 +108,7 @@ export const ApiGetPostsDocs = () => {
 
 export const ApiGetCommentsByPostDocs = () => {
   return applyDecorators(
-    ApiOperation({ summary: 'Get comments by post' }),
+    ApiOperation({ summary: 'Get comments by post ID (paginated)' }),
     ApiParam({
       name: 'id',
       type: String,
@@ -138,13 +146,11 @@ export const ApiGetCommentsByPostDocs = () => {
       type: [CommentEntity],
       description: 'Comments successfully retrieved',
       example: {
-        data: [CommentEntity],
+        data: [CommentReponseSample],
         meta: {
           currentPage: 1,
           totalPages: 1,
           totalItems: 1,
-          limit: 10,
-          offset: 0,
           nextPage: null,
           previousPage: null,
         },
@@ -158,7 +164,7 @@ export const ApiGetCommentsByPostDocs = () => {
 export const ApiCreatePostDocs = () => {
   return applyDecorators(
     ApiOperation({ summary: 'Create a new post' }),
-    ApiBody({ type: PostEntity }),
+    ApiBody({ type: CreatePostDto }),
     ApiResponse({
       status: 201,
       type: PostEntity,
@@ -180,7 +186,7 @@ export const ApiUpdatePostDocs = () => {
       description: 'Post ID (UUID format)',
       required: true,
     }),
-    ApiBody({ type: PostEntity }),
+    ApiBody({ type: UpdatePostDTO }),
     ApiResponse({
       status: 200,
       type: PostEntity,
@@ -191,10 +197,7 @@ export const ApiUpdatePostDocs = () => {
       status: 404,
       description: 'Post not found',
     }),
-    ApiResponse({
-      status: 400,
-      description: 'Bad request',
-    }),
+    ApiBadRequestResponseDecorator(),
     ApiUnauthorizedResponseDecorator(),
     ApiInternalServerErrorResponseDecorator(),
   );
