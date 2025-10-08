@@ -19,11 +19,11 @@ export class PostsService {
     });
   }
 
-  async findPost(id: string) {
+  async findPostById(id: string) {
     return await this.checkPostExists(id);
   }
 
-  async findAll({
+  async findAllPosts({
     page,
     limit,
     orderBy = 'createdAt',
@@ -45,6 +45,41 @@ export class PostsService {
 
     return {
       data: posts,
+      meta: {
+        currentPage: page,
+        totalPages: lastPage,
+        itemsPerPage: limit,
+        totalItems: total,
+        lastPage,
+        nextPage,
+      },
+    };
+  }
+
+  async findCommentsByPost({
+    page,
+    limit,
+    orderBy = 'createdAt',
+    sort = 'desc',
+    postId,
+  }: PaginationQueryDto & { postId: string }) {
+    const skip = (page - 1) * limit;
+
+    const [total, comments] = await this.prisma.$transaction([
+      this.prisma.comment.count({ where: { postId } }),
+      this.prisma.comment.findMany({
+        where: { postId },
+        skip,
+        take: limit,
+        orderBy: { [orderBy]: sort },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+    const nextPage = page + 1 > lastPage ? null : page + 1;
+
+    return {
+      data: comments,
       meta: {
         currentPage: page,
         totalPages: lastPage,

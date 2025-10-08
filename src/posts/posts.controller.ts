@@ -17,6 +17,7 @@ import type { Request } from 'express';
 import {
   ApiCreatePostDocs,
   ApiDeletePostDocs,
+  ApiGetCommentsByPostDocs,
   ApiGetPostDocs,
   ApiGetPostsDocs,
   ApiUpdatePostDocs,
@@ -35,13 +36,25 @@ export class PostsController {
   @ApiGetPostDocs()
   @Get(':id')
   async getPost(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.postsService.findPost(id);
+    return this.postsService.findPostById(id);
   }
 
   @ApiGetPostsDocs()
   @Get()
   async getPosts(@Query() query: PaginationQueryDto) {
-    return this.postsService.findAll(query);
+    return this.postsService.findAllPosts(query);
+  }
+
+  @ApiGetCommentsByPostDocs()
+  @Get(':postId/comments')
+  async getCommentsByPost(
+    @Query() query: PaginationQueryDto,
+    @Query('postId') postId: string,
+  ) {
+    return this.postsService.findCommentsByPost({
+      ...query,
+      postId,
+    });
   }
 
   @ApiUpdatePostDocs()

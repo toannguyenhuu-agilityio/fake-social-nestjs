@@ -12,6 +12,7 @@ import {
   ApiInternalServerErrorResponseDecorator,
   ApiUnauthorizedResponseDecorator,
 } from 'src/shared/decorators';
+import { CommentEntity } from 'src/comments/dtos';
 
 const PostReponseSample = {
   id: 'c4b9f5c1-29b1-4db8-9a13-8e3e5d725c92',
@@ -81,6 +82,63 @@ export const ApiGetPostsDocs = () => {
       description: 'Posts successfully retrieved',
       example: {
         data: [PostReponseSample],
+        meta: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 1,
+          limit: 10,
+          offset: 0,
+          nextPage: null,
+          previousPage: null,
+        },
+      },
+    }),
+    ApiUnauthorizedResponseDecorator(),
+    ApiInternalServerErrorResponseDecorator(),
+  );
+};
+
+export const ApiGetCommentsByPostDocs = () => {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get comments by post' }),
+    ApiParam({
+      name: 'id',
+      type: String,
+      description: 'Post ID (UUID format)',
+      required: true,
+    }),
+    ApiQuery({
+      name: 'page',
+      required: false,
+      default: 1,
+      example: 1,
+      description: 'Page number',
+    }),
+    ApiQuery({
+      name: 'limit',
+      required: false,
+      default: 10,
+      example: 10,
+      description: 'Number of comments per page',
+    }),
+    ApiQuery({
+      name: 'orderBy',
+      required: false,
+      example: 'createdAt',
+      description: 'Field to order by',
+    }),
+    ApiQuery({
+      name: 'sort',
+      required: false,
+      example: 'asc',
+      description: 'Sort direction',
+    }),
+    ApiResponse({
+      status: 200,
+      type: [CommentEntity],
+      description: 'Comments successfully retrieved',
+      example: {
+        data: [CommentEntity],
         meta: {
           currentPage: 1,
           totalPages: 1,
