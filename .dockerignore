@@ -1,0 +1,47 @@
+# Node dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+package-lock.json
+
+# Build output
+dist
+build
+
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Docker / Compose
+Dockerfile
+compose.yml
+compose.dev.yml
+
+# IDE / editor settings
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Test coverage / temp
+coverage
+.nyc_output
+.tmp
+.temp
+
+# Prisma generated
+prisma/generated
