@@ -9,25 +9,11 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: nest_ci
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      JWT_REFRESH_TOKEN: ${{ secrets.JWT_REFRESH_TOKEN }}
+      JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
       NODE_ENV: test
 
     steps:
@@ -42,14 +28,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Prisma Setup
       - name: Generate Prisma client
         run: npx prisma generate
 
+      - name: Push schema to database
+        run: npx prisma db push
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      # Lint and Unit Tests
       - name: Run lint
         run: npm run lint
 
       - name: Run tests
         run: npm run test -- --passWithNoTests
 
+      # E2E Tests
       - name: Run e2e tests
         run: npm run test:e2e
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
