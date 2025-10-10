@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException } from '@nestjs/common/exceptions';
+import {
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common/exceptions';
 import { LoginDto } from './dtos';
 import { JWT_EXPIRES_IN, JWT_SECRET } from 'src/shared/constants/jwt';
 import { validatePassword } from 'src/shared/utils';
@@ -30,6 +33,10 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.usersService.getUserByEmail(dto.email);
+
+    if (!user) {
+      throw new NotFoundException('Email not registered');
+    }
 
     const isPasswordValid = await validatePassword(dto.password, user.password);
 
