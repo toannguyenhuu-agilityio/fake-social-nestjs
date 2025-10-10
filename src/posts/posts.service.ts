@@ -69,6 +69,8 @@ export class PostsService {
     sort = 'desc',
     postId,
   }: PaginationQueryDto & { postId: string }) {
+    await this.checkPostExists(postId);
+
     const skip = (page - 1) * limit;
 
     const [total, comments] = await this.prisma.$transaction([
@@ -138,7 +140,7 @@ export class PostsService {
 
   async checkPostExists(id: string) {
     const existingPost = await this.prisma.post.findUnique({ where: { id } });
-
+    console.log('existingPost', existingPost);
     if (!existingPost) throw new NotFoundException('Post not found');
 
     return existingPost;

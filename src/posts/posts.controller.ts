@@ -49,7 +49,7 @@ export class PostsController {
   @Get(':postId/comments')
   async getCommentsByPost(
     @Query() query: PaginationQueryDto,
-    @Query('postId') postId: string,
+    @Param('postId') postId: string,
   ) {
     return this.postsService.findCommentsByPost({
       ...query,
