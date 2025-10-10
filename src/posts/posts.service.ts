@@ -140,7 +140,7 @@ export class PostsService {
 
   async checkPostExists(id: string) {
     const existingPost = await this.prisma.post.findUnique({ where: { id } });
-    console.log('existingPost', existingPost);
+
     if (!existingPost) throw new NotFoundException('Post not found');
 
     return existingPost;
