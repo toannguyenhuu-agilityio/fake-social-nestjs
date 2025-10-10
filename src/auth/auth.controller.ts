@@ -39,6 +39,8 @@ export class AuthController {
       secure: COOKIE_SECURE,
       maxAge: COOKIE_MAX_AGE.REFRESH,
     });
+
+    return { message: 'Logged in successfully' };
   }
 
   @UseGuards(AuthGuard('jwt-refresh'))

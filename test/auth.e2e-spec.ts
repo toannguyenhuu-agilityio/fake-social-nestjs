@@ -8,13 +8,14 @@ import { App } from 'supertest/types';
 
 import cookieParser from 'cookie-parser';
 
+type ReponseType = {
+  body: { message: string; email: string };
+  headers: Record<string, string>;
+};
+
 describe('Auth (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
-  type ReponseType = {
-    body: { message: string; email: string };
-    headers: Record<string, string>;
-  };
 
   const mockUserData = {
     email: 'toannguyen@gmail.com',
