@@ -4,6 +4,7 @@ import { UsersService } from '../users.service';
 import { UserEntity } from '../dto/user.entity';
 import { PaginationQueryDto } from 'src/shared/dtos';
 import { CreateUserDto, UpdateUserDto } from '../dto';
+import { MOCK_LIST_USER, MOCK_USER } from 'src/mocks';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -42,41 +43,27 @@ describe('UsersController', () => {
 
   describe('getUser', () => {
     it('should return a user entity', async () => {
-      const mockUser = {
-        id: '123',
-        email: 'john@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        password: 'hashed',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockUsersService.getUserById.mockResolvedValue(mockUser);
+      mockUsersService.getUserById.mockResolvedValue(MOCK_USER);
 
       const result = await controller.getUser('123');
 
       expect(mockGetUserById).toHaveBeenCalledWith('123');
       expect(result).toBeInstanceOf(UserEntity);
-      expect(result.id).toBe(mockUser.id);
-      expect(result.email).toBe(mockUser.email);
+      expect(result.id).toBe(MOCK_USER.id);
+      expect(result.email).toBe(MOCK_USER.email);
     });
   });
 
   describe('getUsers', () => {
     it('should return paginated list of users', async () => {
       const query: PaginationQueryDto = { page: 1, limit: 10 };
-      const mockUsers = [
-        { id: '1', email: 'a@test.com' },
-        { id: '2', email: 'b@test.com' },
-      ];
 
-      mockUsersService.findAll.mockResolvedValue(mockUsers);
+      mockUsersService.findAll.mockResolvedValue(MOCK_LIST_USER);
 
       const result = await controller.getUsers(query);
 
       expect(mockFindAll).toHaveBeenCalledWith(query);
-      expect(result).toEqual(mockUsers);
+      expect(result).toEqual(MOCK_LIST_USER);
     });
   });
 
@@ -92,8 +79,8 @@ describe('UsersController', () => {
       const mockCreatedUser = {
         ...dto,
         id: 'uuid-123',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('2025-10-09T00:00:00.000Z'),
+        updatedAt: new Date('2025-10-09T00:00:00.000Z'),
       };
 
       mockUsersService.create.mockResolvedValue(mockCreatedUser);
@@ -113,8 +100,8 @@ describe('UsersController', () => {
         id: 'uuid-1',
         email: 'test@example.com',
         ...dto,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('2025-10-09T00:00:00.000Z'),
+        updatedAt: new Date('2025-10-09T00:00:00.000Z'),
       };
 
       mockUsersService.update.mockResolvedValue(mockUpdatedUser);
@@ -134,8 +121,8 @@ describe('UsersController', () => {
         firstName: 'Del',
         lastName: 'User',
         password: 'hashed',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('2025-10-09T00:00:00.000Z'),
+        updatedAt: new Date('2025-10-09T00:00:00.000Z'),
       };
 
       mockUsersService.delete.mockResolvedValue(mockDeletedUser);

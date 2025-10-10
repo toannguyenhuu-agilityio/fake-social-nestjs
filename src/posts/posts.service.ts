@@ -12,6 +12,12 @@ export class PostsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreatePostDto) {
+    const author = await this.prisma.user.findUnique({
+      where: { id: dto.authorId },
+    });
+
+    if (!author) throw new NotFoundException('Author not found');
+
     return this.prisma.post.create({
       data: {
         ...dto,

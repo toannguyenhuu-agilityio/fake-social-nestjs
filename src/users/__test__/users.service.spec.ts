@@ -11,19 +11,14 @@ jest.mock('src/shared/utils', () => ({
 
 describe('UsersService', () => {
   let service: UsersService;
-  let prisma: PrismaService;
 
-  const mockPrisma = {
-    user: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      count: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    },
-    $transaction: jest.fn(),
-  } as unknown as jest.Mocked<PrismaService>;
+  const mockFindUnique = jest.fn();
+  const mockFindMany = jest.fn();
+  const mockCount = jest.fn();
+  const mockCreate = jest.fn();
+  const mockUpdate = jest.fn();
+  const mockDelete = jest.fn();
+  const mockTransaction = jest.fn();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,13 +26,22 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: PrismaService,
-          useValue: mockPrisma,
+          useValue: {
+            user: {
+              findUnique: mockFindUnique,
+              findMany: mockFindMany,
+              count: mockCount,
+              create: mockCreate,
+              update: mockUpdate,
+              delete: mockDelete,
+            },
+            $transaction: mockTransaction,
+          },
         },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -46,21 +50,19 @@ describe('UsersService', () => {
 
   describe('getUserByEmail', () => {
     it('should return a user by email', async () => {
-      const spy = jest.fn().mockResolvedValue(MOCK_USER);
-      prisma.user.findUnique = spy;
+      mockFindUnique.mockResolvedValue(MOCK_USER);
 
       const result = await service.getUserByEmail(MOCK_USER.email);
 
       expect(result).toEqual(MOCK_USER);
-      expect(spy).toHaveBeenCalledWith({
+      expect(mockFindUnique).toHaveBeenCalledWith({
         where: { email: MOCK_USER.email },
       });
     });
   });
 
   it('should throw NotFoundException if email not found', async () => {
-    const spy = jest.fn().mockResolvedValue(null);
-    prisma.user.findUnique = spy;
+    mockFindUnique.mockResolvedValue(null);
 
     await expect(service.getUserByEmail('nope@example.com')).rejects.toThrow(
       NotFoundException,
@@ -69,16 +71,14 @@ describe('UsersService', () => {
 
   describe('getUserById', () => {
     it('should return user when found', async () => {
-      const spy = jest.fn().mockResolvedValue(MOCK_USER);
-      prisma.user.findUnique = spy;
+      mockFindUnique.mockResolvedValue(MOCK_USER);
 
       const result = await service.getUserById(MOCK_USER.id);
       expect(result).toEqual(MOCK_USER);
     });
 
     it('should throw NotFoundException when not found', async () => {
-      const spy = jest.fn().mockResolvedValue(null);
-      prisma.user.findUnique = spy;
+      mockFindUnique.mockResolvedValue(null);
 
       await expect(service.getUserById('999')).rejects.toThrow(
         NotFoundException,
@@ -88,13 +88,11 @@ describe('UsersService', () => {
 
   describe('findAll', () => {
     it('should return paginated users', async () => {
-      const spyFindMany = jest.fn().mockResolvedValue(MOCK_LIST_USER);
-      prisma.user.findMany = spyFindMany;
+      mockFindMany.mockResolvedValue(MOCK_LIST_USER);
 
-      const spyCount = jest.fn().mockResolvedValue(2);
-      prisma.user.count = spyCount;
+      mockCount.mockResolvedValue(2);
 
-      const spyTransaction = jest.fn().mockImplementation(async (actions) => {
+      mockTransaction.mockImplementation(async (actions) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         const count = await actions[0];
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -103,13 +101,12 @@ describe('UsersService', () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return [count, list];
       });
-      prisma.$transaction = spyTransaction;
 
       const result = await service.findAll({ page: 1, limit: 2 });
 
       expect(result.data).toEqual(MOCK_LIST_USER);
       expect(result.meta.totalItems).toBe(2);
-      expect(spyTransaction).toHaveBeenCalled();
+      expect(mockTransaction).toHaveBeenCalled();
     });
   });
 
@@ -122,13 +119,11 @@ describe('UsersService', () => {
         lastName: 'Doe',
       };
 
-      const spy = jest.fn().mockResolvedValue(null);
-      prisma.user.findUnique = spy;
+      mockFindUnique.mockResolvedValue(null);
 
       (hashPassword as jest.Mock).mockResolvedValue('hashed123');
 
-      const spyCreate = jest.fn().mockResolvedValue({ id: '1', ...dto });
-      prisma.user.create = spyCreate;
+      mockCreate.mockResolvedValue({ id: '1', ...dto });
 
       const result = await service.create(dto);
 
@@ -138,11 +133,10 @@ describe('UsersService', () => {
     });
 
     it('should throw ConflictException if email already registered', async () => {
-      const spyFindUnique = jest.fn().mockResolvedValue({
+      mockFindUnique.mockResolvedValue({
         id: '1',
         email: 'exists@example.com',
       });
-      prisma.user.findUnique = spyFindUnique;
 
       await expect(
         service.create({
@@ -160,15 +154,13 @@ describe('UsersService', () => {
       const id = '1';
       const dto = { firstName: 'New' };
 
-      const spyFindUnique = jest.fn().mockResolvedValue({ id });
-      prisma.user.findUnique = spyFindUnique;
+      mockFindUnique.mockResolvedValue({ id });
 
-      const spyUpdate = jest.fn().mockResolvedValue({ id, ...dto });
-      prisma.user.update = spyUpdate;
+      mockUpdate.mockResolvedValue({ id, ...dto });
 
       const result = await service.update(id, dto);
 
-      expect(spyUpdate).toHaveBeenCalledWith({
+      expect(mockUpdate).toHaveBeenCalledWith({
         where: { id },
         data: dto,
       });
@@ -176,8 +168,7 @@ describe('UsersService', () => {
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      const spyFindUnique = jest.fn().mockResolvedValue(null);
-      prisma.user.findUnique = spyFindUnique;
+      mockFindUnique.mockResolvedValue(null);
 
       await expect(
         service.update('123', { firstName: 'Test' }),
@@ -190,21 +181,18 @@ describe('UsersService', () => {
       const id = '1';
       const user = { id, email: 'x@example.com' };
 
-      const spyFindUnique = jest.fn().mockResolvedValue(user);
-      prisma.user.findUnique = spyFindUnique;
+      mockFindUnique.mockResolvedValue(user);
 
-      const spyDelete = jest.fn().mockResolvedValue(user);
-      prisma.user.delete = spyDelete;
+      mockDelete.mockResolvedValue(user);
 
       const result = await service.delete(id);
 
-      expect(spyDelete).toHaveBeenCalledWith({ where: { id } });
+      expect(mockDelete).toHaveBeenCalledWith({ where: { id } });
       expect(result).toEqual(user);
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      const spyFindUnique = jest.fn().mockResolvedValue(null);
-      prisma.user.findUnique = spyFindUnique;
+      mockFindUnique.mockResolvedValue(null);
 
       await expect(service.delete('not-exist')).rejects.toThrow(
         NotFoundException,
