@@ -129,6 +129,8 @@ describe('PostsService', () => {
       const query = { page: 1, limit: 5, postId: 'post-1' };
       mockTransaction.mockResolvedValue([2, MOCK_LIST_COMMENT]);
 
+      mockPostFindUnique.mockResolvedValue({ id: 'post-1' });
+
       const result = await service.findCommentsByPost(query);
 
       expect(mockTransaction).toHaveBeenCalled();
