@@ -17,11 +17,6 @@ build
 .env.*
 !.env.example
 
-# Docker / Compose
-Dockerfile
-compose.yml
-compose.dev.yml
-
 # IDE / editor settings
 .vscode
 .idea
@@ -42,5 +37,3 @@ coverage
 .tmp
 .temp
 
-# Prisma generated
-prisma/generated
