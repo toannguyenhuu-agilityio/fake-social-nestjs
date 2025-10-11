@@ -37,4 +37,14 @@ describe('PrismaService', () => {
 
     expect(disconnectSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('should call $transaction when cleanDb is called', async () => {
+    const transactionSpy = jest
+      .spyOn(service, '$transaction')
+      .mockResolvedValue('test');
+
+    await service.cleanDb();
+
+    expect(transactionSpy).toHaveBeenCalledTimes(1);
+  });
 });

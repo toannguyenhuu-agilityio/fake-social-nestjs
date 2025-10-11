@@ -4,7 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { validatePassword } from 'src/shared/utils';
-import { UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_CREDENTIALS,
@@ -68,6 +68,13 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
+    it('should throw if user not found', async () => {
+      usersService.getUserByEmail.mockResolvedValue(null);
+
+      await expect(
+        authService.login({ email: 'test@example.com', password: 'test' }),
+      ).rejects.toThrow(NotFoundException);
+    });
     it('should throw if password invalid', async () => {
       usersService.getUserByEmail.mockResolvedValue(MOCK_USER);
 
