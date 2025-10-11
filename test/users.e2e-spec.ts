@@ -6,38 +6,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { COOKIE_KEYS } from '../src/shared/constants/cookies';
 import { App } from 'supertest/types';
 import cookieParser from 'cookie-parser';
-
-type UserReponseType = {
-  body: {
-    id: string;
-    message: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-  };
-  headers: Record<string, string>;
-};
-
-type ListUserReponseType = {
-  body: {
-    data: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      createdAt: Date;
-      updatedAt: Date;
-    };
-    meta: {
-      currentPage: number;
-      itemsPerPage: number;
-      totalItems: number;
-      totalPages: number;
-      lastPage: number;
-      nextPage: number;
-    };
-  };
-};
+import { ListUserResponseType, UserResponseType } from 'src/shared/interfaces';
 
 describe('User (e2e)', () => {
   let app: INestApplication;
@@ -83,7 +52,7 @@ describe('User (e2e)', () => {
   });
 
   it('should register a new user successfully', async () => {
-    const res: UserReponseType = await request(server)
+    const res: UserResponseType = await request(server)
       .post('/users')
       .send(BodyRequest)
       .expect(201);
@@ -112,7 +81,7 @@ describe('User (e2e)', () => {
   });
 
   it('should get list of users when authenticated', async () => {
-    const res: ListUserReponseType = await request(server)
+    const res: ListUserResponseType = await request(server)
       .get('/users?page=1&limit=5')
       .set('Cookie', cookies)
       .expect(200);
@@ -124,7 +93,7 @@ describe('User (e2e)', () => {
   });
 
   it('should get user by ID', async () => {
-    const res: UserReponseType = await request(app.getHttpServer() as App)
+    const res: UserResponseType = await request(app.getHttpServer() as App)
       .get(`/users/${userId}`)
       .set('Cookie', cookies)
       .expect(200);
@@ -143,7 +112,7 @@ describe('User (e2e)', () => {
   });
 
   it('should update user firstName and lastName', async () => {
-    const res: UserReponseType = await request(app.getHttpServer() as App)
+    const res: UserResponseType = await request(app.getHttpServer() as App)
       .patch(`/users/${userId}`)
       .set('Cookie', cookies)
       .send({ firstName: 'Updated', lastName: 'User' })
@@ -164,7 +133,7 @@ describe('User (e2e)', () => {
   });
 
   it('should delete user successfully', async () => {
-    const res: UserReponseType = await request(server)
+    const res: UserResponseType = await request(server)
       .delete(`/users/${userId}`)
       .set('Cookie', cookies)
       .expect(200);

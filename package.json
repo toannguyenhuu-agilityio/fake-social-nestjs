@@ -87,7 +87,10 @@
       "**/*.(t|j)s",
       "!**/*.module.ts",
       "!**/main.ts",
-      "!**/app.module.ts"
+      "!**/app.module.ts",
+      "!**/interfaces/**",
+      "!**/dtos/**",
+      "!**/constants/**"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
