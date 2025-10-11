@@ -10,7 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { CreateCommentDto } from './dtos';
+import { CreateCommentDto, UpdateCommentDto } from './dtos';
 import { ApiTags } from '@nestjs/swagger';
 import {
   ApiCreateCommentDocs,
@@ -40,7 +40,7 @@ export class CommentsController {
   @ApiUpdateCommentDocs()
   @Patch(':id')
   async updateComment(
-    @Body() dto: CreateCommentDto,
+    @Body() dto: UpdateCommentDto,
     @Param('id') id: string,
     @Req() req: Request,
   ) {
