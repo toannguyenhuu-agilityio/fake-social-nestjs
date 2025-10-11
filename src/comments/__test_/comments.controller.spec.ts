@@ -3,6 +3,9 @@ import { CommentsController } from '../comments.controller';
 import { CommentsService } from '../comments.service';
 import { CreateCommentDto } from '../dtos';
 import { MOCK_COMMENT } from 'src/mocks';
+import type { Request } from 'express';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 describe('CommentsController', () => {
   let controller: CommentsController;
@@ -12,6 +15,17 @@ describe('CommentsController', () => {
   const mockUpdate = jest.fn();
   const mockDelete = jest.fn();
   const mockCheckCommentExists = jest.fn();
+  const mockCommentFindUnique = jest.fn();
+
+  const dto: CreateCommentDto = {
+    content: 'Updated comment!',
+    authorId: 'user-uuid',
+    postId: 'post-uuid',
+  };
+
+  const req = {
+    user: { userId: 'user-1' },
+  } as unknown as Request;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,6 +39,14 @@ describe('CommentsController', () => {
             update: mockUpdate,
             delete: mockDelete,
             checkCommentExists: mockCheckCommentExists,
+          },
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            comment: {
+              findUnique: mockCommentFindUnique,
+            },
           },
         },
       ],
@@ -82,10 +104,30 @@ describe('CommentsController', () => {
 
       mockUpdate.mockResolvedValue(mockUpdatedComment);
 
-      const result = await controller.updateComment(dto, 'comment-uuid');
+      const result = await controller.updateComment(dto, 'comment-uuid', req);
 
-      expect(mockUpdate).toHaveBeenCalledWith('comment-uuid', dto);
+      expect(mockUpdate).toHaveBeenCalledWith('comment-uuid', dto, 'user-1');
       expect(result).toEqual(mockUpdatedComment);
+    });
+
+    it('should throw NotFoundException when updating non-existing comment', async () => {
+      mockUpdate.mockRejectedValue(new NotFoundException('Comment not found'));
+
+      await expect(
+        controller.updateComment(dto, 'comment-uuid', req),
+      ).rejects.toThrow(new NotFoundException('Comment not found'));
+    });
+
+    it('should throw ForbiddenException when user is not the author', async () => {
+      mockUpdate.mockRejectedValue(
+        new ForbiddenException('You are not allowed to update this comment'),
+      );
+
+      await expect(
+        controller.updateComment(dto, 'comment-uuid', req),
+      ).rejects.toThrow(
+        new ForbiddenException('You are not allowed to update this comment'),
+      );
     });
   });
 
@@ -98,12 +140,36 @@ describe('CommentsController', () => {
         postId: 'post-uuid',
       };
 
+      const req = {
+        user: { userId: 'user-1' },
+      } as unknown as Request;
+
       mockDelete.mockResolvedValue(mockDeletedComment);
 
-      const result = await controller.deleteComment('comment-uuid');
+      const result = await controller.deleteComment('comment-uuid', req);
 
-      expect(mockDelete).toHaveBeenCalledWith('comment-uuid');
+      expect(mockDelete).toHaveBeenCalledWith('comment-uuid', 'user-1');
       expect(result).toEqual(mockDeletedComment);
+    });
+
+    it('should throw NotFoundException when deleting non-existing comment', async () => {
+      mockDelete.mockRejectedValue(new NotFoundException('Comment not found'));
+
+      await expect(
+        controller.deleteComment('comment-uuid', req),
+      ).rejects.toThrow(new NotFoundException('Comment not found'));
+    });
+
+    it('should throw ForbiddenException when user is not the author', async () => {
+      mockDelete.mockRejectedValue(
+        new ForbiddenException('You are not allowed to delete this comment'),
+      );
+
+      await expect(
+        controller.deleteComment('comment-uuid', req),
+      ).rejects.toThrow(
+        new ForbiddenException('You are not allowed to delete this comment'),
+      );
     });
   });
 });

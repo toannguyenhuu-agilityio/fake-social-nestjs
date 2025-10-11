@@ -6,7 +6,9 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { COOKIE_KEYS } from '../src/shared/constants/cookies';
 import { App } from 'supertest/types';
 import cookieParser from 'cookie-parser';
+
 jest.setTimeout(30000);
+
 type UserReponseType = {
   body: {
     id: string;

@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dtos';
@@ -17,6 +18,7 @@ import {
   ApiGetCommentDocs,
   ApiUpdateCommentDocs,
 } from './decorators';
+import type { Request } from 'express';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -37,13 +39,25 @@ export class CommentsController {
 
   @ApiUpdateCommentDocs()
   @Patch(':id')
-  async updateComment(@Body() dto: CreateCommentDto, @Param('id') id: string) {
-    return this.commentsService.update(id, dto);
+  async updateComment(
+    @Body() dto: CreateCommentDto,
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    const user = req.user as { userId: string };
+
+    return this.commentsService.update(id, dto, user.userId);
   }
 
   @ApiDeleteCommentDocs()
   @Delete(':id')
-  async deleteComment(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.commentsService.delete(id);
+  async deleteComment(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: Request,
+  ) {
+    const user = req.user as { userId: string };
+    const userId = user.userId;
+
+    return this.commentsService.delete(id, userId);
   }
 }
