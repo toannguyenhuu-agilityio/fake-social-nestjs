@@ -7,12 +7,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { hashPassword } from 'src/shared/utils';
 import { PaginationQueryDto } from 'src/shared/dtos';
+import { User } from 'generated/prisma';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<User | null> {
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });

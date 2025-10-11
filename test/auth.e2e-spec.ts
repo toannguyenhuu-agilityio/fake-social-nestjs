@@ -62,7 +62,6 @@ describe('Auth (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
-    await prisma.cleanDb();
   });
 
   it('should create a new user', async () => {
