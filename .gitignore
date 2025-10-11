@@ -17,6 +17,7 @@ lerna-debug.log*
 
 # Tests
 /coverage
+/coverage-e2e
 /.nyc_output
 
 # IDEs and editors
@@ -41,6 +42,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+.env.test
 
 # temp directory
 .temp
