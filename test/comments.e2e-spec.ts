@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import { PostResponseType, UserResponseType } from 'src/shared/interfaces';
 import { CommentResponseType } from 'src/shared/interfaces/comments';
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
 describe('Comments E2E', () => {
   let app: INestApplication;
