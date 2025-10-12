@@ -3,7 +3,7 @@ import { CommentsService } from '../comments.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCommentDto, UpdateCommentDto } from '../dtos';
 import { MOCK_COMMENT } from 'src/mocks';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 describe('CommentsService', () => {
   let service: CommentsService;
@@ -98,7 +98,7 @@ describe('CommentsService', () => {
       mockFindUnique.mockResolvedValue(mockExisting);
       mockUpdate.mockResolvedValue(mockUpdated);
 
-      const result = await service.update('comment-1', dto);
+      const result = await service.update('comment-1', dto, 'user-1');
 
       expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: 'comment-1' },
@@ -111,22 +111,38 @@ describe('CommentsService', () => {
       mockFindUnique.mockResolvedValue(null);
 
       await expect(
-        service.update('invalid-id', { content: 'test' }),
+        service.update('invalid-id', { content: 'test' }, 'user-1'),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException if user is not the author', async () => {
+      const dto: UpdateCommentDto = { content: 'Updated text' };
+      const mockExisting = {
+        id: 'comment-1',
+        content: 'Old text',
+        authorId: 'user-2',
+      };
+
+      mockFindUnique.mockResolvedValue(mockExisting);
+
+      await expect(service.update('comment-1', dto, 'user-1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
   describe('delete', () => {
-    it('should delete a comment successfully', async () => {
+    it('should delete a comment successfully when user is the author', async () => {
       const mockExisting = {
         id: 'comment-1',
         content: 'To delete',
+        authorId: 'user-1',
       };
 
       mockFindUnique.mockResolvedValue(mockExisting);
       mockDelete.mockResolvedValue(mockExisting);
 
-      const result = await service.delete('comment-1');
+      const result = await service.delete('comment-1', 'user-1');
 
       expect(mockDelete).toHaveBeenCalledWith({
         where: { id: 'comment-1' },
@@ -134,10 +150,24 @@ describe('CommentsService', () => {
       expect(result).toEqual(mockExisting);
     });
 
+    it('should throw ForbiddenException if user is not the author', async () => {
+      const mockExisting = {
+        id: 'comment-1',
+        content: 'To delete',
+        authorId: 'user-2',
+      };
+
+      mockFindUnique.mockResolvedValue(mockExisting);
+
+      await expect(service.delete('comment-1', 'user-1')).rejects.toThrow(
+        new ForbiddenException('You are not allowed to delete this comment'),
+      );
+    });
+
     it('should throw NotFoundException when deleting non-existing comment', async () => {
       mockFindUnique.mockResolvedValue(null);
 
-      await expect(service.delete('not-exist')).rejects.toThrow(
+      await expect(service.delete('not-exist', 'user-1')).rejects.toThrow(
         NotFoundException,
       );
     });

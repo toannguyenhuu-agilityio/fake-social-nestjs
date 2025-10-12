@@ -6,52 +6,13 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { COOKIE_KEYS } from '../src/shared/constants/cookies';
 import { App } from 'supertest/types';
 import cookieParser from 'cookie-parser';
+import {
+  PostListReponseType,
+  PostResponseType,
+  UserResponseType,
+} from 'src/shared/interfaces';
 
 jest.setTimeout(60000);
-
-type UserReponseType = {
-  body: {
-    id: string;
-    message: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-  };
-  headers: Record<string, string>;
-};
-
-type PostReponseType = {
-  body: {
-    id: string;
-    message: string;
-    title: string;
-    content: string;
-    authorId: string;
-  };
-  headers: Record<string, string>;
-};
-
-type PostListReponseType = {
-  body: {
-    data: {
-      id: string;
-      title: string;
-      content: string;
-      authorId: string;
-      createdAt: Date;
-      updatedAt: Date;
-    };
-    meta: {
-      currentPage: number;
-      itemsPerPage: number;
-      totalItems: number;
-      totalPages: number;
-      lastPage: number;
-      nextPage: number;
-    };
-  };
-  headers: Record<string, string>;
-};
 
 describe('Posts E2E', () => {
   let app: INestApplication;
@@ -100,7 +61,7 @@ describe('Posts E2E', () => {
   });
 
   it('should create a user successfully', async () => {
-    const res: UserReponseType = await request(server)
+    const res: UserResponseType = await request(server)
       .post('/users')
       .send(BodyRequest)
       .expect(201);
@@ -125,7 +86,7 @@ describe('Posts E2E', () => {
   });
 
   it('should create a post successfully', async () => {
-    const res: PostReponseType = await request(server)
+    const res: PostResponseType = await request(server)
       .post('/posts')
       .set('Cookie', cookies)
       .send({ ...postData, authorId: userId })
@@ -147,7 +108,7 @@ describe('Posts E2E', () => {
   });
 
   it('should get post by id', async () => {
-    const res: PostReponseType = await request(server)
+    const res: PostResponseType = await request(server)
       .get(`/posts/${postId}`)
       .set('Cookie', cookies)
       .expect(200);
@@ -159,7 +120,7 @@ describe('Posts E2E', () => {
   it('should update the post successfully', async () => {
     const updatedData = { title: 'Updated Post Title' };
 
-    const res: PostReponseType = await request(server)
+    const res: PostResponseType = await request(server)
       .patch(`/posts/${postId}`)
       .set('Cookie', cookies)
       .send(updatedData)
@@ -200,7 +161,7 @@ describe('Posts E2E', () => {
   });
 
   it('should delete post successfully', async () => {
-    const res: PostReponseType = await request(server)
+    const res: PostResponseType = await request(server)
       .delete(`/posts/${postId}`)
       .set('Cookie', cookies)
       .expect(200);
