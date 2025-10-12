@@ -19,6 +19,7 @@ describe('PostsService', () => {
   const mockCommentFindMany = jest.fn();
   const mockCommentCount = jest.fn();
   const mockTransaction = jest.fn();
+  const mockCommentDeleteMany = jest.fn();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,6 +42,7 @@ describe('PostsService', () => {
             comment: {
               findMany: mockCommentFindMany,
               count: mockCommentCount,
+              deleteMany: mockCommentDeleteMany,
             },
             $transaction: mockTransaction,
           },
@@ -184,6 +186,32 @@ describe('PostsService', () => {
       const result = await service.delete('p1', 'u1');
 
       expect(mockDelete).toHaveBeenCalledWith({ where: { id: 'p1' } });
+      expect(result).toEqual(mockPost);
+    });
+
+    it('should delete all related comments and then the post if user is the author', async () => {
+      const mockPost = { id: 'p1', authorId: 'u1' };
+      mockPostFindUnique.mockResolvedValue(mockPost);
+      mockCommentDeleteMany.mockResolvedValue({ count: 2 });
+      mockDelete.mockResolvedValue(mockPost);
+
+      const result = await service.delete('p1', 'u1');
+
+      // Check post existence
+      expect(mockPostFindUnique).toHaveBeenCalledWith({
+        where: { id: 'p1' },
+      });
+
+      // Check comments deletion
+      expect(mockCommentDeleteMany).toHaveBeenCalledWith({
+        where: { postId: 'p1' },
+      });
+
+      // Check post deletion
+      expect(mockDelete).toHaveBeenCalledWith({
+        where: { id: 'p1' },
+      });
+
       expect(result).toEqual(mockPost);
     });
 
