@@ -131,6 +131,11 @@ export class PostsService {
     if (authorId && userId !== authorId)
       throw new ForbiddenException('You are not allowed to delete this post');
 
+    // Delete all comments related to this post first
+    await this.prisma.comment.deleteMany({
+      where: { postId: id },
+    });
+
     return this.prisma.post.delete({
       where: {
         id,

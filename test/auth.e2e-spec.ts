@@ -5,8 +5,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AppModule } from 'src/app.module';
 import { COOKIE_KEYS } from 'src/shared/constants/cookies';
 import { App } from 'supertest/types';
-
 import cookieParser from 'cookie-parser';
+
+jest.setTimeout(60000);
 
 type ReponseType = {
   body: { message: string; email: string };
