@@ -6,6 +6,7 @@ import { MOCK_COMMENT } from 'src/mocks';
 import type { Request } from 'express';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthUser } from 'src/auth/interfaces';
 
 describe('CommentsController', () => {
   let controller: CommentsController;
@@ -24,8 +25,8 @@ describe('CommentsController', () => {
   };
 
   const req = {
-    user: { userId: 'user-1' },
-  } as unknown as Request;
+    userId: 'user-1',
+  } as AuthUser;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -139,10 +140,6 @@ describe('CommentsController', () => {
         authorId: 'user-uuid',
         postId: 'post-uuid',
       };
-
-      const req = {
-        user: { userId: 'user-1' },
-      } as unknown as Request;
 
       mockDelete.mockResolvedValue(mockDeletedComment);
 

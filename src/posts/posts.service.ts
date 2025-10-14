@@ -136,6 +136,11 @@ export class PostsService {
       where: { postId: id },
     });
 
+    // Recheck the post still exists (handles cascade or race)
+    const stillExists = await this.prisma.post.findUnique({ where: { id } });
+
+    if (!stillExists) throw new NotFoundException('Post already deleted');
+
     return this.prisma.post.delete({
       where: {
         id,

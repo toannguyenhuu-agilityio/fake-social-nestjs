@@ -7,7 +7,6 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
-  Req,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto, UpdateCommentDto } from './dtos';
@@ -18,7 +17,8 @@ import {
   ApiGetCommentDocs,
   ApiUpdateCommentDocs,
 } from './decorators';
-import type { Request } from 'express';
+import { GetUser } from 'src/shared/decorators';
+import type { AuthUser } from 'src/auth/interfaces';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -42,20 +42,19 @@ export class CommentsController {
   async updateComment(
     @Body() dto: UpdateCommentDto,
     @Param('id') id: string,
-    @Req() req: Request,
+    @GetUser() user: AuthUser,
   ) {
-    const user = req.user as { userId: string };
+    const userId = user.userId;
 
-    return this.commentsService.update(id, dto, user.userId);
+    return this.commentsService.update(id, dto, userId);
   }
 
   @ApiDeleteCommentDocs()
   @Delete(':id')
   async deleteComment(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Req() req: Request,
+    @GetUser() user: AuthUser,
   ) {
-    const user = req.user as { userId: string };
     const userId = user.userId;
 
     return this.commentsService.delete(id, userId);
