@@ -8,12 +8,10 @@ import {
   Patch,
   Post,
   Query,
-  Req,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto, UpdatePostDTO } from './dtos';
 import { PaginationQueryDto } from 'src/shared/dtos';
-import type { Request } from 'express';
 import {
   ApiCreatePostDocs,
   ApiDeletePostDocs,
@@ -22,6 +20,8 @@ import {
   ApiGetPostsDocs,
   ApiUpdatePostDocs,
 } from './decorators';
+import type { AuthUser } from 'src/auth/interfaces';
+import { GetUser } from 'src/shared/decorators';
 
 @Controller('posts')
 export class PostsController {
@@ -62,9 +62,8 @@ export class PostsController {
   async updatePost(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdatePostDTO,
-    @Req() req: Request,
+    @GetUser() user: AuthUser,
   ) {
-    const user = req.user as { userId: string };
     const userId = user.userId;
 
     return this.postsService.update({ id, dto, userId });
@@ -74,9 +73,8 @@ export class PostsController {
   @Delete(':id')
   async deletePost(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Req() req: Request,
+    @GetUser() user: AuthUser,
   ) {
-    const user = req.user as { userId: string };
     const userId = user.userId;
 
     return this.postsService.delete(id, userId);
