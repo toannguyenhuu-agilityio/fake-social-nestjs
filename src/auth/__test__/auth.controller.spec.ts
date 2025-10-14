@@ -14,6 +14,7 @@ import {
   COOKIE_SECURE,
 } from 'src/shared/constants/cookies';
 import { LoginDto } from '../dtos';
+import { AuthUser } from '../interfaces';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -30,11 +31,9 @@ describe('AuthController', () => {
   } as unknown as Response;
 
   const mockReq = {
-    user: {
-      userId: 'mockUserId',
-      email: 'mockEmail@email.com',
-    },
-  } as unknown as Request;
+    userId: 'mockUserId',
+    email: 'mockEmail@email.com',
+  } as AuthUser;
 
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({

@@ -6,3 +6,8 @@ export interface AuthenticatedRequest extends Request {
     refresh_token?: string;
   };
 }
+
+export interface AuthUser {
+  userId: string;
+  email: string;
+}

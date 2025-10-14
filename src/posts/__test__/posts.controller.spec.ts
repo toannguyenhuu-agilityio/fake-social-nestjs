@@ -5,6 +5,7 @@ import { CreatePostDto, UpdatePostDTO } from '../dtos';
 import { MOCK_LIST_COMMENT, MOCK_LIST_POST, MOCK_POST } from 'src/mocks';
 import { PaginationQueryDto } from 'src/shared/dtos';
 import type { Request } from 'express';
+import { AuthUser } from 'src/auth/interfaces';
 
 describe('PostsController', () => {
   let controller: PostsController;
@@ -113,8 +114,8 @@ describe('PostsController', () => {
       const dto: UpdatePostDTO = { content: 'Updated content' };
 
       const req = {
-        user: { userId: 'user-1' },
-      } as unknown as Request;
+        userId: 'user-1',
+      } as AuthUser;
 
       const mockUpdated = {
         id,
@@ -141,8 +142,8 @@ describe('PostsController', () => {
     it('should delete post for given user', async () => {
       const id = 'post-123';
       const req = {
-        user: { userId: 'user-1' },
-      } as unknown as Request;
+        userId: 'user-1',
+      } as AuthUser;
 
       const mockDeleted = {
         id,

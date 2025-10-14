@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos';
 import { AuthGuard } from '@nestjs/passport';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import {
   COOKIE_KEYS,
   COOKIE_HTTP_ONLY,
@@ -12,6 +12,8 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { ApiLoginDocs, ApiLogoutDocs, ApiRefreshTokenDocs } from './decorators';
+import type { AuthUser } from './interfaces';
+import { GetUser } from 'src/shared/decorators';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -47,10 +49,10 @@ export class AuthController {
   @ApiRefreshTokenDocs()
   @Post('refresh')
   async refresh(
-    @Req() req: Request,
+    @GetUser() user: AuthUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { userId, email } = req.user as { userId: string; email: string };
+    const { userId, email } = user;
     const { accessToken, refreshToken } = await this.authService.refreshTokens(
       userId,
       email,
