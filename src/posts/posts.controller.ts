@@ -22,10 +22,14 @@ import {
 } from './decorators';
 import type { AuthUser } from 'src/auth/interfaces';
 import { GetUser } from 'src/shared/decorators';
+import { CacheContext } from 'src/caching/cache.context';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private postsService: PostsService) {}
+  constructor(
+    private postsService: PostsService,
+    private cache: CacheContext,
+  ) {}
 
   @ApiCreatePostDocs()
   @Post()
@@ -36,13 +40,27 @@ export class PostsController {
   @ApiGetPostDocs()
   @Get(':id')
   async getPost(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.postsService.findPostById(id);
+    const cached = await this.cache.get(`post_${id}`);
+    if (cached) return cached;
+
+    const post = await this.postsService.findPostById(id);
+
+    await this.cache.set(`post_${id}`, post, 60000);
+
+    return post;
   }
 
   @ApiGetPostsDocs()
   @Get()
   async getPosts(@Query() query: PaginationQueryDto) {
-    return this.postsService.findAllPosts(query);
+    const cached = await this.cache.get('all_posts');
+    if (cached) return cached;
+
+    const posts = await this.postsService.findAllPosts(query);
+
+    await this.cache.set('all_posts', posts, 60000);
+
+    return posts;
   }
 
   @ApiGetCommentsByPostDocs()

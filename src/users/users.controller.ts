@@ -24,19 +24,31 @@ import {
   ApiUpdateUserDocs,
 } from './decorators';
 import { PaginationQueryDto } from 'src/shared/dtos';
+import { CacheContext } from 'src/caching/cache.context';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private cache: CacheContext,
+  ) {}
 
   @ApiGetUserDocs()
   @Get(':id')
   async getUser(@Param('id', new ParseUUIDPipe()) id: string) {
+    const cacheKey = `user_${id}`;
+    const cached = await this.cache.get(cacheKey);
+    if (cached) return cached;
+
     const user = await this.usersService.getUserById(id);
 
-    return new UserEntity(user);
+    const transformedUser = new UserEntity(user);
+
+    await this.cache.set(cacheKey, transformedUser, 300000);
+
+    return transformedUser;
   }
 
   @ApiGetUsersDocs()
